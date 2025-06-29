@@ -26,11 +26,11 @@ fi
 
 # Step 2: Run semgrep to find secrets in the project
 # Copy semgrep rules from current directory into project directory for git hook use.
-if [ ! -d "$PROJECT_DIR/$SEMGREP_LOCAL_RULES/generic" ]; then
-  mkdir -p "$PROJECT_DIR/$SEMGREP_LOCAL_RULES/generic"
-  cp -r "$SEMGREP_LOCAL_RULES/generic" "$PROJECT_DIR/$SEMGREP_LOCAL_RULES/"
+if [ ! -d "$PROJECT_DIR/../$SEMGREP_LOCAL_RULES/generic" ]; then
+  mkdir -p "$PROJECT_DIR/../$SEMGREP_LOCAL_RULES/generic"
+  cp -r "$SEMGREP_LOCAL_RULES/generic" "$PROJECT_DIR/../$SEMGREP_LOCAL_RULES/"
 fi
-# Create .semgrepignore to exclude the ruleset from analysi
+# Create .semgrepignore to exclude the ruleset from analysis
 cat <<EOF > "$PROJECT_DIR/.semgrepignore"
 # Ignore ruleset.
 semgrep-php-secrets/**
@@ -95,7 +95,7 @@ fi
 # Step 5: Git pre-commit hook to detect secrets
 cat <<EOF > "$GIT_HOOK_FILE"
 #!/bin/bash
-PYTHONWARNINGS="ignore::UserWarning" semgrep --config "$SEMGREP_LOCAL_RULES/generic/secrets" --include "*.php" --include="*.js" --include="*.css" . > /dev/null
+PYTHONWARNINGS="ignore::UserWarning" semgrep --config "../$SEMGREP_LOCAL_RULES/generic/secrets" --include "*.php" --include="*.js" --include="*.css" . > /dev/null
 if [ \$? -ne 0 ]; then
     echo "[ERROR] Possible secret found. Please remove before commit."
     exit 1
