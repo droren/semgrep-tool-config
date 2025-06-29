@@ -1,0 +1,10 @@
+# No output stored
+*.txt
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+
+# Do not store cloned repositories
+semgrep-php-secrets
