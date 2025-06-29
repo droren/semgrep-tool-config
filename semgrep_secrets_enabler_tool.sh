@@ -62,6 +62,36 @@ if (file_exists(__DIR__ . '/.env')) {
 ?>
 PHP
 
+# Step 4.1: Ensure .htaccess includes auto_prepend_file for load_env.php
+HTACCESS_FILE="$PROJECT_DIR/.htaccess"
+LOAD_ENV_PATH="$(realpath "$PROJECT_DIR/load_env.php")"
+
+if ! grep -q "auto_prepend_file" "$HTACCESS_FILE" 2>/dev/null; then
+  echo "\n# Auto-prepend environment loader" >> "$HTACCESS_FILE"
+  echo "php_value auto_prepend_file \"$LOAD_ENV_PATH\"" >> "$HTACCESS_FILE"
+  echo "[INFO] .htaccess updated to auto-load environment variables."
+else
+  echo "[INFO] .htaccess already contains auto_prepend_file directive. Skipping."
+fi
+
+# Step 4.2: Verify .env entries and print usage tips, also create .env.example
+ENV_FILE="$PROJECT_DIR/.env"
+ENV_EXAMPLE_FILE="$PROJECT_DIR/.env.example"
+if [ -f "$ENV_FILE" ]; then
+  echo "[INFO] Verifying .env entries and showing usage suggestions:"
+  > "$ENV_EXAMPLE_FILE"
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      key="${line%%=*}"
+      echo "- $key (use in PHP as: getenv('$key'))"
+      echo "$key=" >> "$ENV_EXAMPLE_FILE"
+    fi
+  done < "$ENV_FILE"
+  echo "[INFO] .env.example created at $ENV_EXAMPLE_FILE"
+else
+  echo "[INFO] No .env file found at $ENV_FILE. Skipping verification."
+fi
+
 # Step 5: Git pre-commit hook to detect secrets
 cat <<EOF > "$GIT_HOOK_FILE"
 #!/bin/bash
